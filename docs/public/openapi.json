@@ -6245,6 +6245,15 @@
             "description": "Per-key override of the deployment-wide reject_user_mismatch setting: null (default) inherits it, true always rejects a request naming a different 'user', false always accepts it. Spend binds to this key's own user either way.",
             "title": "Reject User Mismatch"
           },
+          "scopes": {
+            "description": "The endpoint groups the key may reach. Omitted, the key gets 'inference' alone, which calls models and nothing else. The end_users scopes are a service key's alone.",
+            "items": {
+              "$ref": "#/components/schemas/KeyScope"
+            },
+            "minItems": 1,
+            "title": "Scopes",
+            "type": "array"
+          },
           "user_id": {
             "anyOf": [
               {
@@ -6434,6 +6443,13 @@
             ],
             "title": "Reject User Mismatch"
           },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/KeyScope"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
           "user_id": {
             "anyOf": [
               {
@@ -6458,6 +6474,7 @@
           "is_active",
           "allowed_models",
           "allowed_tools",
+          "scopes",
           "exclude_from_budget",
           "reject_user_mismatch",
           "capture_agent_telemetry",
@@ -6605,6 +6622,15 @@
             ],
             "description": "Per-key override of the deployment-wide reject_user_mismatch setting: null (default) inherits it, true always rejects a request naming a different 'user', false always accepts it. Spend binds to your own user either way.",
             "title": "Reject User Mismatch"
+          },
+          "scopes": {
+            "description": "The endpoint groups the key may reach. Omitted, the key gets 'inference' alone, which calls models and nothing else. The end_users scopes are a service key's alone.",
+            "items": {
+              "$ref": "#/components/schemas/KeyScope"
+            },
+            "minItems": 1,
+            "title": "Scopes",
+            "type": "array"
           },
           "workspace_id": {
             "anyOf": [
@@ -12369,6 +12395,13 @@
             ],
             "title": "Reject User Mismatch"
           },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/KeyScope"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
           "user_id": {
             "anyOf": [
               {
@@ -12400,6 +12433,7 @@
           "operator_can_enable",
           "allowed_models",
           "allowed_tools",
+          "scopes",
           "exclude_from_budget",
           "reject_user_mismatch",
           "capture_agent_telemetry",
@@ -12558,6 +12592,29 @@
         ],
         "title": "KeyLimitPublic",
         "type": "object"
+      },
+      "KeyScope": {
+        "description": "One group of endpoints an API key may be granted.",
+        "enum": [
+          "inference",
+          "files:read",
+          "files:write",
+          "batches:read",
+          "batches:write",
+          "web",
+          "code:execute",
+          "mcp:read",
+          "mcp:execute",
+          "telemetry:write",
+          "agents",
+          "usage:read",
+          "usage:write",
+          "end_users:read",
+          "end_users:write",
+          "end_users:delete"
+        ],
+        "title": "KeyScope",
+        "type": "string"
       },
       "KnownProviderSchema": {
         "description": "A selected provider's autofill hints for the add-provider form.",
@@ -25633,6 +25690,22 @@
               }
             ],
             "title": "Reject User Mismatch"
+          },
+          "scopes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KeyScope"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The endpoint groups the key may reach, replacing the ones it holds; omitted or null leaves them unchanged. Takes effect on the key's next request. The end_users scopes are a service key's alone.",
+            "title": "Scopes"
           }
         },
         "title": "UpdateKeyRequest",
@@ -25801,6 +25874,22 @@
               }
             ],
             "title": "Reject User Mismatch"
+          },
+          "scopes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KeyScope"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The endpoint groups the key may reach, replacing the ones it holds; omitted or null leaves them unchanged. Takes effect on the key's next request. The end_users scopes are a service key's alone.",
+            "title": "Scopes"
           }
         },
         "title": "UpdateOwnKeyRequest",
@@ -32250,6 +32339,9 @@
         "summary": "Create Speech",
         "tags": [
           "audio"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -32372,6 +32464,9 @@
         "summary": "Create Transcription",
         "tags": [
           "audio"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -33521,6 +33616,9 @@
         "summary": "List Batches",
         "tags": [
           "batches"
+        ],
+        "x-otari-key-scopes": [
+          "batches:read"
         ]
       },
       "post": {
@@ -33567,6 +33665,9 @@
         "summary": "Create Batch",
         "tags": [
           "batches"
+        ],
+        "x-otari-key-scopes": [
+          "batches:write"
         ]
       }
     },
@@ -33625,6 +33726,9 @@
         "summary": "Retrieve Batch",
         "tags": [
           "batches"
+        ],
+        "x-otari-key-scopes": [
+          "batches:read"
         ]
       }
     },
@@ -33683,6 +33787,9 @@
         "summary": "Cancel Batch",
         "tags": [
           "batches"
+        ],
+        "x-otari-key-scopes": [
+          "batches:write"
         ]
       }
     },
@@ -33747,6 +33854,9 @@
         "summary": "Retrieve Batch Results",
         "tags": [
           "batches"
+        ],
+        "x-otari-key-scopes": [
+          "batches:read"
         ]
       }
     },
@@ -34551,7 +34661,8 @@
         "summary": "List Catalog",
         "tags": [
           "catalog"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/catalog/models/{model_id}": {
@@ -34621,7 +34732,8 @@
         "summary": "Get Catalog Model",
         "tags": [
           "catalog"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/catalog/selectors/refresh": {
@@ -34737,6 +34849,9 @@
         "summary": "Chat Completions",
         "tags": [
           "chat"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -34787,6 +34902,9 @@
         "summary": "Execute Code",
         "tags": [
           "code-execution"
+        ],
+        "x-otari-key-scopes": [
+          "code:execute"
         ]
       }
     },
@@ -34837,6 +34955,9 @@
         "summary": "Create Decision",
         "tags": [
           "decisions"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -34887,6 +35008,9 @@
         "summary": "Create Embedding",
         "tags": [
           "embeddings"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -34921,6 +35045,9 @@
         "summary": "List End User Budgets",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:read"
         ]
       }
     },
@@ -35015,6 +35142,9 @@
         "summary": "Delete End Users",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:delete"
         ]
       },
       "get": {
@@ -35149,6 +35279,9 @@
         "summary": "List End Users",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:read"
         ]
       },
       "patch": {
@@ -35211,6 +35344,9 @@
         "summary": "Update End User By Query",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:write"
         ]
       },
       "put": {
@@ -35283,6 +35419,9 @@
         "summary": "Put End User By Query",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:write"
         ]
       }
     },
@@ -35329,6 +35468,9 @@
         "summary": "Delete End User",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:delete"
         ]
       },
       "get": {
@@ -35380,6 +35522,9 @@
         "summary": "Get End User",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:read"
         ]
       },
       "patch": {
@@ -35441,6 +35586,9 @@
         "summary": "Update End User",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:write"
         ]
       },
       "put": {
@@ -35512,6 +35660,9 @@
         "summary": "Put End User",
         "tags": [
           "end-users"
+        ],
+        "x-otari-key-scopes": [
+          "end_users:write"
         ]
       }
     },
@@ -35636,6 +35787,9 @@
         "summary": "Create Fetch",
         "tags": [
           "fetch"
+        ],
+        "x-otari-key-scopes": [
+          "web"
         ]
       }
     },
@@ -35699,6 +35853,9 @@
         "summary": "Create Fetch For Tool",
         "tags": [
           "fetch"
+        ],
+        "x-otari-key-scopes": [
+          "web"
         ]
       }
     },
@@ -35875,6 +36032,9 @@
         "summary": "List Files",
         "tags": [
           "files"
+        ],
+        "x-otari-key-scopes": [
+          "files:read"
         ]
       },
       "post": {
@@ -35961,6 +36121,9 @@
         "summary": "Create File",
         "tags": [
           "files"
+        ],
+        "x-otari-key-scopes": [
+          "files:write"
         ]
       }
     },
@@ -36036,6 +36199,9 @@
         "summary": "Delete File",
         "tags": [
           "files"
+        ],
+        "x-otari-key-scopes": [
+          "files:write"
         ]
       },
       "get": {
@@ -36109,6 +36275,9 @@
         "summary": "Get File",
         "tags": [
           "files"
+        ],
+        "x-otari-key-scopes": [
+          "files:read"
         ]
       }
     },
@@ -36191,6 +36360,9 @@
         "summary": "Get File Content",
         "tags": [
           "files"
+        ],
+        "x-otari-key-scopes": [
+          "files:read"
         ]
       }
     },
@@ -36482,6 +36654,9 @@
         "summary": "Check Policy",
         "tags": [
           "hooks"
+        ],
+        "x-otari-key-scopes": [
+          "agents"
         ]
       }
     },
@@ -36535,6 +36710,9 @@
         "summary": "Record Guardrail Definition",
         "tags": [
           "hooks"
+        ],
+        "x-otari-key-scopes": [
+          "agents"
         ]
       }
     },
@@ -37632,6 +37810,9 @@
         "summary": "Edit Image",
         "tags": [
           "images"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -37680,6 +37861,9 @@
         "summary": "Create Image",
         "tags": [
           "images"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -37794,6 +37978,9 @@
         "summary": "Get Key Budget",
         "tags": [
           "key"
+        ],
+        "x-otari-key-scopes": [
+          "usage:read"
         ]
       }
     },
@@ -38119,6 +38306,9 @@
         "summary": "Get Key Usage Series",
         "tags": [
           "key"
+        ],
+        "x-otari-key-scopes": [
+          "usage:read"
         ]
       }
     },
@@ -38480,6 +38670,9 @@
         "summary": "Get Key Usage Summary",
         "tags": [
           "key"
+        ],
+        "x-otari-key-scopes": [
+          "usage:read"
         ]
       }
     },
@@ -39654,6 +39847,9 @@
         "summary": "Execute Mcp Tool",
         "tags": [
           "mcp"
+        ],
+        "x-otari-key-scopes": [
+          "mcp:execute"
         ]
       }
     },
@@ -39734,6 +39930,9 @@
         "summary": "List Mcp Servers",
         "tags": [
           "mcp"
+        ],
+        "x-otari-key-scopes": [
+          "mcp:read"
         ]
       }
     },
@@ -39876,6 +40075,9 @@
         "summary": "List Mcp Tools",
         "tags": [
           "mcp"
+        ],
+        "x-otari-key-scopes": [
+          "mcp:read"
         ]
       }
     },
@@ -39972,6 +40174,9 @@
         "summary": "Create Message",
         "tags": [
           "messages"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -40032,6 +40237,9 @@
         "summary": "Count Message Tokens",
         "tags": [
           "messages"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -40214,7 +40422,8 @@
         "summary": "List Models",
         "tags": [
           "models"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/models/discoverable": {
@@ -40349,7 +40558,8 @@
         "summary": "Get Model",
         "tags": [
           "models"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/moderations": {
@@ -40411,6 +40621,9 @@
         "summary": "Create Moderation",
         "tags": [
           "moderations"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -50418,7 +50631,8 @@
         "summary": "List Pricing",
         "tags": [
           "pricing"
-        ]
+        ],
+        "x-otari-key-scopes": []
       },
       "post": {
         "description": "Set or update pricing for a model.\n\nRejects an alias or a routing policy: pricing, budgets, and usage all key on\nthe model a request resolves to, so a row stored under either name would\nnever be read.",
@@ -50531,7 +50745,8 @@
         "summary": "List Current Pricing",
         "tags": [
           "pricing"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/pricing/drift": {
@@ -50898,7 +51113,8 @@
         "summary": "Get Pricing",
         "tags": [
           "pricing"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/pricing/{model_key}/history": {
@@ -50973,7 +51189,8 @@
         "summary": "Get Pricing History",
         "tags": [
           "pricing"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/provider-endpoints": {
@@ -51346,7 +51563,8 @@
         "summary": "Provider Catalog",
         "tags": [
           "providers"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/providers/catalog/{provider_id}": {
@@ -51397,7 +51615,8 @@
         "summary": "Provider Catalog Detail",
         "tags": [
           "providers"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/providers/health": {
@@ -51680,6 +51899,9 @@
         "summary": "Create Rerank",
         "tags": [
           "rerank"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -51766,6 +51988,9 @@
         "summary": "Create Response",
         "tags": [
           "responses"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -52070,6 +52295,9 @@
         "summary": "Recommend Model For Agent",
         "tags": [
           "routing"
+        ],
+        "x-otari-key-scopes": [
+          "agents"
         ]
       }
     },
@@ -52612,6 +52840,9 @@
         "summary": "Create Search",
         "tags": [
           "search"
+        ],
+        "x-otari-key-scopes": [
+          "web"
         ]
       }
     },
@@ -52780,7 +53011,8 @@
         "summary": "List Search Providers",
         "tags": [
           "search-tools"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/search-tools/reencrypt": {
@@ -53087,6 +53319,9 @@
         "summary": "Create Search For Tool",
         "tags": [
           "search"
+        ],
+        "x-otari-key-scopes": [
+          "web"
         ]
       }
     },
@@ -53508,6 +53743,9 @@
         "summary": "Create Systemone Decision",
         "tags": [
           "decisions"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -53616,7 +53854,8 @@
         "summary": "List Builtin Guardrails",
         "tags": [
           "tool-settings"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/tool-settings/guardrails/profiles": {
@@ -53646,7 +53885,8 @@
         "summary": "List Guardrail Profiles",
         "tags": [
           "tool-settings"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/tool-settings/sandbox/credential": {
@@ -53815,7 +54055,8 @@
         "summary": "List Tools",
         "tags": [
           "tools"
-        ]
+        ],
+        "x-otari-key-scopes": []
       }
     },
     "/api/v1/trace-content/policy": {
@@ -55893,6 +56134,9 @@
         "summary": "Ingest External Usage",
         "tags": [
           "usage"
+        ],
+        "x-otari-key-scopes": [
+          "usage:write"
         ]
       }
     },
@@ -55975,6 +56219,9 @@
         "summary": "Get Request Settlement",
         "tags": [
           "usage"
+        ],
+        "x-otari-key-scopes": [
+          "usage:read"
         ]
       }
     },
@@ -57306,6 +57553,9 @@
         "summary": "List Videos",
         "tags": [
           "videos"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       },
       "post": {
@@ -57354,6 +57604,9 @@
         "summary": "Create Video",
         "tags": [
           "videos"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -57405,6 +57658,9 @@
         "summary": "Retrieve Video",
         "tags": [
           "videos"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -57458,6 +57714,9 @@
         "summary": "Retrieve Video Content",
         "tags": [
           "videos"
+        ],
+        "x-otari-key-scopes": [
+          "inference"
         ]
       }
     },
@@ -60677,6 +60936,9 @@
         "summary": "Receive Logs",
         "tags": [
           "otel"
+        ],
+        "x-otari-key-scopes": [
+          "telemetry:write"
         ]
       }
     },
@@ -60705,6 +60967,9 @@
         "summary": "Receive Metrics",
         "tags": [
           "otel"
+        ],
+        "x-otari-key-scopes": [
+          "telemetry:write"
         ]
       }
     },
@@ -60733,6 +60998,9 @@
         "summary": "Receive Traces",
         "tags": [
           "otel"
+        ],
+        "x-otari-key-scopes": [
+          "telemetry:write"
         ]
       }
     }

@@ -44,16 +44,18 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Request, Response
 
 from gateway.api.deps import DirectToolServiceDep, verify_api_key_or_master_key
+from gateway.api.key_scopes import key_scope
 from gateway.api.routes._helpers import answer_direct_tool_call
 from gateway.models.api_keys import APIKey
 from gateway.schemas.tools import SearchRequest, SearchResponse
+from gateway.types.key_scope import KeyScope
 
 router = APIRouter(tags=["search"])
 
 SEARCH_ENDPOINT = "/v1/search"
 
 
-@router.post("/search")
+@router.post("/search", openapi_extra=key_scope(KeyScope.WEB))
 async def create_search(
     raw_request: Request,
     response: Response,
@@ -90,7 +92,7 @@ async def create_search(
     )
 
 
-@router.post("/search/{search_tool_name}")
+@router.post("/search/{search_tool_name}", openapi_extra=key_scope(KeyScope.WEB))
 async def create_search_for_tool(
     raw_request: Request,
     response: Response,

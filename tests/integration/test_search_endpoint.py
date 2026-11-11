@@ -50,7 +50,7 @@ from gateway.services.search_backend import SearchHit, SearchOutcome, SearchProv
 from gateway.services.secret_box import generate_secret_key
 from gateway.services.tools import DirectSearch, DirectSearchResult
 
-from .conftest import build_test_client
+from .conftest import ALL_KEY_SCOPES, ALL_SERVICE_KEY_SCOPES, build_test_client
 
 SEARCH_USAGE_LABEL = "/v1/search"
 
@@ -95,7 +95,11 @@ def _client_on(test_config: GatewayConfig, **updates: Any) -> Generator[TestClie
 
 def _keyed(client: TestClient, master_key_header: dict[str, str], user_id: str) -> dict[str, str]:
     assert client.post(f"{API_ROOT}/users", json={"user_id": user_id}, headers=master_key_header).status_code == 200
-    key = client.post(f"{API_ROOT}/keys", json={"key_name": user_id, "user_id": user_id}, headers=master_key_header)
+    key = client.post(
+        f"{API_ROOT}/keys",
+        json={"scopes": ALL_KEY_SCOPES, "key_name": user_id, "user_id": user_id},
+        headers=master_key_header,
+    )
     assert key.status_code == 200, key.text
     return {API_KEY_HEADER: f"Bearer {key.json()['key']}"}
 
@@ -632,7 +636,12 @@ def test_search_honors_the_keys_model_allowlist(
     client.post(f"{API_ROOT}/users", json={"user_id": "narrow-user"}, headers=master_key_header)
     key = client.post(
         f"{API_ROOT}/keys",
-        json={"key_name": "narrow-key", "user_id": "narrow-user", "allowed_models": ["openai:gpt-4o"]},
+        json={
+            "scopes": ALL_KEY_SCOPES,
+            "key_name": "narrow-key",
+            "user_id": "narrow-user",
+            "allowed_models": ["openai:gpt-4o"],
+        },
         headers=master_key_header,
     ).json()
     headers = {API_KEY_HEADER: f"Bearer {key['key']}"}
@@ -655,7 +664,7 @@ def _key_with(client: TestClient, master_key_header: dict[str, str], user: dict[
     assert client.post(f"{API_ROOT}/users", json=user, headers=master_key_header).status_code == 200
     return client.post(
         f"{API_ROOT}/keys",
-        json={"key_name": user["user_id"], "user_id": user["user_id"], **lists},
+        json={"scopes": ALL_KEY_SCOPES, "key_name": user["user_id"], "user_id": user["user_id"], **lists},
         headers=master_key_header,
     )
 
@@ -743,7 +752,12 @@ def test_a_key_narrows_its_users_tools(client: TestClient, master_key_header: di
     assert (
         client.post(
             f"{API_ROOT}/keys",
-            json={"key_name": "narrow", "user_id": "tool-capped", "allowed_tools": ["fake-search"]},
+            json={
+                "scopes": ALL_KEY_SCOPES,
+                "key_name": "narrow",
+                "user_id": "tool-capped",
+                "allowed_tools": ["fake-search"],
+            },
             headers=master_key_header,
         ).status_code
         == 200
@@ -779,7 +793,9 @@ def test_a_users_first_tool_list_keeps_its_narrowed_keys_where_they_were(
 
     def key(name: str, **lists: Any) -> Any:
         created = client.post(
-            f"{API_ROOT}/keys", json={"key_name": name, "user_id": "migrating", **lists}, headers=master_key_header
+            f"{API_ROOT}/keys",
+            json={"scopes": ALL_KEY_SCOPES, "key_name": name, "user_id": "migrating", **lists},
+            headers=master_key_header,
         )
         assert created.status_code == 200, created.text
         return created
@@ -999,7 +1015,12 @@ def test_search_logs_an_allowlist_refusal(
     client.post(f"{API_ROOT}/users", json={"user_id": "denied-user"}, headers=master_key_header)
     key = client.post(
         f"{API_ROOT}/keys",
-        json={"key_name": "denied-key", "user_id": "denied-user", "allowed_models": ["openai:gpt-4o"]},
+        json={
+            "scopes": ALL_KEY_SCOPES,
+            "key_name": "denied-key",
+            "user_id": "denied-user",
+            "allowed_models": ["openai:gpt-4o"],
+        },
         headers=master_key_header,
     ).json()
 
@@ -1036,6 +1057,7 @@ def test_a_budget_exempt_keys_search_refusal_still_counts_toward_budget(
     key = client.post(
         f"{API_ROOT}/keys",
         json={
+            "scopes": ALL_KEY_SCOPES,
             "key_name": "exempt-search-key",
             "user_id": "exempt-search-user",
             "allowed_models": ["openai:gpt-4o"],
@@ -1195,7 +1217,7 @@ def test_search_is_budget_enforced(
     )
     key = client.post(
         f"{API_ROOT}/keys",
-        json={"key_name": "broke-key", "user_id": "broke-user"},
+        json={"scopes": ALL_KEY_SCOPES, "key_name": "broke-key", "user_id": "broke-user"},
         headers=master_key_header,
     ).json()
 
@@ -1227,7 +1249,7 @@ def test_a_config_priced_search_is_reserved_before_it_runs(
     )
     key = client.post(
         f"{API_ROOT}/keys",
-        json={"key_name": "near-cap-key", "user_id": "near-cap-user"},
+        json={"scopes": ALL_KEY_SCOPES, "key_name": "near-cap-key", "user_id": "near-cap-user"},
         headers=master_key_header,
     ).json()
 
@@ -1287,6 +1309,7 @@ def test_a_service_key_bills_search_to_the_end_user_it_names(
     key = client.post(
         f"{API_ROOT}/keys",
         json={
+            "scopes": ALL_SERVICE_KEY_SCOPES,
             "key_name": "mlpa-search",
             "user_id": "mlpa-search",
             "is_service_key": True,
@@ -1368,6 +1391,7 @@ def test_a_service_key_starts_a_search_end_user_on_the_budget_it_names(
     key = client.post(
         f"{API_ROOT}/keys",
         json={
+            "scopes": ALL_SERVICE_KEY_SCOPES,
             "user_id": "mlpa-multi",
             "is_service_key": True,
             "end_user_budget_ids": ["search-default", "search-memories"],
@@ -1879,7 +1903,11 @@ def _on_request_budget(client: TestClient, master_key_header: dict[str, str], us
         headers=master_key_header,
     )
     assert user.status_code == 200, user.text
-    key = client.post(f"{API_ROOT}/keys", json={"key_name": user_id, "user_id": user_id}, headers=master_key_header)
+    key = client.post(
+        f"{API_ROOT}/keys",
+        json={"scopes": ALL_KEY_SCOPES, "key_name": user_id, "user_id": user_id},
+        headers=master_key_header,
+    )
     assert key.status_code == 200, key.text
     return {API_KEY_HEADER: f"Bearer {key.json()['key']}"}
 
@@ -2022,7 +2050,12 @@ def test_a_budget_exempt_keys_unpriced_search_is_served(
     assert user.status_code == 200, user.text
     key = strict_client.post(
         f"{API_ROOT}/keys",
-        json={"key_name": "exempt-search", "user_id": "exempt-search", "exclude_from_budget": True},
+        json={
+            "scopes": ALL_KEY_SCOPES,
+            "key_name": "exempt-search",
+            "user_id": "exempt-search",
+            "exclude_from_budget": True,
+        },
         headers=master_key_header,
     )
     assert key.status_code == 200, key.text

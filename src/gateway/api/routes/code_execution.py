@@ -44,6 +44,7 @@ from gateway.api.deps import (
     get_log_writer,
     verify_api_key_or_master_key,
 )
+from gateway.api.key_scopes import key_scope
 from gateway.api.request_id import set_request_id
 from gateway.api.routes._passthrough import resolve_passthrough_user_id
 from gateway.api.routes._pipeline import (
@@ -93,6 +94,7 @@ from gateway.services.tools import (
     unpriced_tool_detail,
 )
 from gateway.services.workspace_scope import organization_for_key_id, workspace_for_key_id
+from gateway.types.key_scope import KeyScope
 from gateway.types.tool_charges import GATEWAY_TOOL_PRICING_PROVIDER, gateway_tool_pricing_key
 
 router = APIRouter(prefix="/code", tags=["code-execution"])
@@ -106,7 +108,7 @@ _DECLARATION: list[dict[str, Any]] = [{"type": "otari_code_execution"}]
 _PRICING_KEY = gateway_tool_pricing_key(CODE_EXECUTION_TOOL_NAME)
 
 
-@router.post("/execute")
+@router.post("/execute", openapi_extra=key_scope(KeyScope.CODE_EXECUTE))
 async def execute_code(
     raw_request: Request,
     response: Response,
