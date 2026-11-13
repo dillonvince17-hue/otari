@@ -32,11 +32,6 @@ if TYPE_CHECKING:
     from gateway.services.tools import DirectToolOutcome
 
 
-GUARDRAILS_RESULT_HEADER = "Otari-Guardrails"
-"""Response header carrying a compact JSON summary of guardrail verdicts when a
-``monitor``-mode (or otherwise non-blocking) check ran."""
-
-
 def bounded_body(request: Request, max_bytes: int, too_large: str) -> Request:
     """``request``, refusing its body with 413 once more than ``max_bytes`` arrive, whatever ``Content-Length`` says.
 

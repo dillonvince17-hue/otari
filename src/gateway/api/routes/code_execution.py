@@ -52,7 +52,7 @@ from gateway.api.routes._pipeline import (
     _elapsed_ms,
     log_gateway_rejection,
 )
-from gateway.core.config import END_USER_BUDGET_HEADER, GatewayConfig
+from gateway.core.config import CONTAINER_EXPIRES_AT_HEADER, CONTAINER_ID_HEADER, END_USER_BUDGET_HEADER, GatewayConfig
 from gateway.core.database import release_session
 from gateway.core.error_codes import INSUFFICIENT_FUNDS, PRICING_REQUIRED, error_headers
 from gateway.core.metered_pricing import quantize_cost
@@ -409,8 +409,8 @@ async def execute_code(
     await reconcile_reservation(db, reservation, cost)
 
     if backend.lease is not None:
-        response.headers["Otari-Container-Id"] = backend.lease.container_id
-        response.headers["Otari-Container-Expires-At"] = backend.lease.expires_at.isoformat()
+        response.headers[CONTAINER_ID_HEADER] = backend.lease.container_id
+        response.headers[CONTAINER_EXPIRES_AT_HEADER] = backend.lease.expires_at.isoformat()
     if rate_limit_info:
         for header, value in rate_limit_headers(rate_limit_info).items():
             response.headers[header] = value
